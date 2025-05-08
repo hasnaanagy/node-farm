@@ -1,26 +1,14 @@
 const fs=require("fs")
 const http=require("http")
 const url=require("url")
-
+const replacePlaceHolders=require("./modules/replacePlaceholder")
 const data=fs.readFileSync(`${__dirname}/dev-data/data.json`,"utf-8")
 const dataObj=JSON.parse(data)
 const cardTemplate=fs.readFileSync(`${__dirname}/templates/card-template.html`,"utf-8")
 const productTemplate=fs.readFileSync(`${__dirname}/templates/product-template.html`,"utf-8")
 const overviewTemplate=fs.readFileSync(`${__dirname}/templates/overview-template.html`,"utf-8")
 
-const replacePlaceHolders=(template,product)=>{
-    let output=template.replace(/{%PRODUCTNAME%}/g,product.productName)
-        output=output.replace(/{%IMAGE%}/g,product.image)
-        output=output.replace(/{%FROM%}/g,product.from)
-        output=output.replace(/{%NUTRIENTS%}/g,product.nutrients)
-         output=output.replace(/{%QUANTITY%}/g,product.quantity)
-         output=output.replace(/{%PRICE%}/g,product.price)
-         output=output.replace(/{%ID%}/g,product.id)
-         output=output.replace(/{%DESCRIPTION%}/g,product.description)
-         if(!product.organic) output=output.replace(/{%NOT_ORGANIC%}/g,"not-organic")
 
-    return output
-}
 const server=http.createServer((req,res)=>{
     const {query,pathname}=url.parse(req.url,true)
 
@@ -37,6 +25,12 @@ const server=http.createServer((req,res)=>{
         const productDetailes=replacePlaceHolders(productTemplate,dataObj[query.id])
         res.end(productDetailes)
         
+    }
+    else{
+        res.writeHead(404,{
+            "content-type":"text/html"
+        })
+        res.end("<h1>Page Not Found</h1>")
     }
 })
 
